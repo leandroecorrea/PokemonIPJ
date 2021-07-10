@@ -1,0 +1,12 @@
+Pidgeot
+61
+182
+111
+105
+98
+95
+Normal Flying
+Wing Attack
+Mirror Move
+Sky Attack
+Whirlwind

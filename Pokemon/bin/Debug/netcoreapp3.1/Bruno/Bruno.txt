@@ -1,0 +1,5 @@
+Onix.txt
+Hitmonchan.txt
+Hitmonlee.txt
+Onix2.txt
+Machamp.txt

@@ -1,0 +1,12 @@
+Hitmonchan
+55
+137
+150
+108
+54
+143
+Fight
+Ice Punch
+Fire Punch
+Thunder Punch
+Counter

@@ -1,0 +1,6 @@
+Alakazam.txt
+Arcanine.txt
+Gyarados.txt
+Hitmonlee.txt
+Pidgeot.txt
+Charizard.txt
