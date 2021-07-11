@@ -12,7 +12,7 @@ public class Liga
     int totalEnemies;    
     EnemyTrainer enemyTrainer;    
     int healsRemaining;
-    enum LigaOptions {Battle, Stats, Heal, Save, BackToMenu, Exit}
+    enum LigaOptions {Battle = 1, Stats, Heal, Save, BackToMenu, Exit}
     bool gamePlay = true;
     Battle battle;
     string[] enemiesList;

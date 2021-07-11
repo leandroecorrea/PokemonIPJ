@@ -17,6 +17,19 @@ public class Pokemon
     public int battleDefense;
     public int battleSpecialAttack;
     public int battleSpecialDefense;
+    public int turnsParalyzed = 0;
+    public int turnsToBeParalyzed = 0;
+    public int turnsAsleep = 0;
+    public int turnsToSleep = 0;
+    public int turnsConfused = 0;
+    public int turnsToBeConfused = 0;
+    public int chargeTurns = 0;
+    public int turnsToCharge = 0;
+    public int leerTurns = 0;
+    public int turnsToBeLeered = 0;
+    public int tailWhipTurns = 0;
+    public int turnsToBeTailWhipped = 0;
+    public int rageBoost = 0;
     public bool canAttack;
     public bool autoAttack;
     public Dictionary<string, ElementalTypes> pokeType = new Dictionary<string, ElementalTypes>();
@@ -28,6 +41,7 @@ public class Pokemon
     public Pokemon(string filePath)
     {
         ReadPokemon(filePath);
+        maxHP = HP;
         battleAttack = attack;
         battleDefense = defense;
         battleSpecialAttack = specialAttack;
@@ -112,6 +126,14 @@ public class Pokemon
     public bool ShouldHeal()
     {
         if (HP < (maxHP * 0.40))
+        {
+            return true;
+        }
+        return false;
+    }
+    public bool MustRetreat()
+    {
+        if (HP < (maxHP * 0.1) && HP > (maxHP * 0.1))
         {
             return true;
         }

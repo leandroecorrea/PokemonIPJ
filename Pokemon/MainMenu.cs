@@ -28,6 +28,7 @@ public class MainMenu
                 Console.WriteLine("Opción no válida");
                 break;
         }
+        Console.Clear();
     }
 }
 

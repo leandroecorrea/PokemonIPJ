@@ -8,14 +8,7 @@ public class Battle
 
     enum STATUS { HEAL, RETREAT, ATTACK }
     STATUS status;
-    int turnsParalyzed = 0;
-    int turnsToBeParalyzed = 0;
-    int turnsAsleep = 0;
-    int turnsToSleep = 0;
-    int turnsConfused = 0;
-    int turnsToBeConfused = 0;
-    int chargeTurns = 0;
-    int turnsToCharge = 0;
+    
 
     public Battle()
     {
@@ -27,14 +20,53 @@ public class Battle
         currentEnemyTrainer.battlePokemon = InitialBattlePokemon(currentEnemyTrainer.pokemonList);
         bool battleLoop = true;
         while (battleLoop)
-        {            
+        {
+            Console.Clear();
+            Console.WriteLine(player.name);
+            Console.WriteLine();
+            Console.WriteLine("Pokemon:" + player.pokemonList[player.battlePokemon].name);
+            Console.WriteLine("HP" + player.pokemonList[player.battlePokemon].HP + "/" + player.pokemonList[player.battlePokemon].GetMaxHP());
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine(currentEnemyTrainer.name);
+            Console.WriteLine();
+            Console.WriteLine("Pokemon:" + currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].name);
+            Console.WriteLine("HP" + currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].HP + "/" + currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].GetMaxHP());
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("------------------------------------------------------------------------------------------------------------------");
             (player, currentEnemyTrainer) = PlayerTurno(player, currentEnemyTrainer);
-            battleLoop = BattleChecker(player);
+            battleLoop = BattleChecker(currentEnemyTrainer);
+            Console.WriteLine("Presiona enter para continuar");
+            Console.ReadLine();
             if (battleLoop)
             {
+                Console.Clear();
+                Console.WriteLine(player.name);
+                Console.WriteLine();
+                Console.WriteLine("Pokemon:" + player.pokemonList[player.battlePokemon].name);
+                Console.WriteLine("HP" + player.pokemonList[player.battlePokemon].HP + "/" + player.pokemonList[player.battlePokemon].GetMaxHP());
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine(currentEnemyTrainer.name);
+                Console.WriteLine();
+                Console.WriteLine("Pokemon:" + currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].name);
+                Console.WriteLine("HP" + currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].HP + "/" + currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].GetMaxHP());
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine("------------------------------------------------------------------------------------------------------------------");
+                Console.WriteLine("Es el turno del enemigo");
+                Console.ReadLine();
                 (player, currentEnemyTrainer) = EnemyTurno(currentEnemyTrainer, player);
-                battleLoop = BattleChecker(currentEnemyTrainer);
+                Console.Clear();
+                (battleLoop, player) = BattleChecker(player);
             }
+            Console.WriteLine("Presiona enter para continuar");
+            Console.ReadLine();
         }
         return player;
     }
@@ -44,6 +76,7 @@ public class Battle
         do
         {
             Console.WriteLine("1 - Movimiento 2 - Cambiar pokemon");
+            
             int option = Convert.ToInt32(Console.ReadLine());
             switch (option)
             {
@@ -75,7 +108,7 @@ public class Battle
             {
                 player.pokemonList[player.battlePokemon] = PlayerSetMove(player.pokemonList[player.battlePokemon]);
             }
-        }
+        }        
         return BattleMovement(player, currentEnemyTrainer);
     }
     public Pokemon PlayerSetMove(Pokemon pokemon)
@@ -89,7 +122,7 @@ public class Battle
 
             for (int i = 0; i < pokemon.movementList.Count; i++)
             {
-                Console.WriteLine(i + pokemon.movementList[i].name);
+                Console.WriteLine(i + " - " + pokemon.movementList[i].name);
                 //battleMoves.Add(movements.name);
             }
             option = Convert.ToInt32(Console.ReadLine());
@@ -114,14 +147,16 @@ public class Battle
         {
             if (currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].autoAttack)
             {
+                Console.WriteLine("El enemigo está confundido y se ataca a sí mismo");                
                 currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].autoAttack = false;
+                return BattleMovement(currentEnemyTrainer, player);
             }
             else
             {
-                (player, currentEnemyTrainer) = AISwitcher(currentEnemyTrainer, player);
+                (player, currentEnemyTrainer) = AISwitcher(currentEnemyTrainer, player);                
             }
-        }        
-        return BattleMovement(currentEnemyTrainer, player); 
+        }
+        return new KeyValuePair<Player, EnemyTrainer>(player, currentEnemyTrainer);
     }
     public KeyValuePair<Player, EnemyTrainer> AISwitcher(EnemyTrainer currentEnemyTrainer, Player player)
     {
@@ -130,35 +165,53 @@ public class Battle
         {
             case STATUS.HEAL:
                 currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].movementChosen = SetEnemyHealMove(currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon]);
-                return BattleMovement(currentEnemyTrainer, player);                
+                return BattleMovement(currentEnemyTrainer, player);
             case STATUS.RETREAT:
                 currentEnemyTrainer.battlePokemon = RetreatEnemyPokemon(currentEnemyTrainer.pokemonList);
                 Console.WriteLine("El enemigo cambió su pokemon, " + currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].name + " fue elegido");
-                return ReturnCaster(currentEnemyTrainer, player);                
+                break;
             case STATUS.ATTACK:
                 currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon].movementChosen = SetEnemyDamageMove(currentEnemyTrainer.pokemonList[currentEnemyTrainer.battlePokemon], player.pokemonList[player.battlePokemon]);
-                return BattleMovement(currentEnemyTrainer, player);                
+                return BattleMovement(currentEnemyTrainer, player);
             default:
-                return ReturnCaster(currentEnemyTrainer, player);                
+                break;
         }
-    }
+        return new KeyValuePair<Player, EnemyTrainer>(player, currentEnemyTrainer);
+    }    
+    
     public KeyValuePair<Player, EnemyTrainer> BattleMovement(Trainer caster, Trainer foe)
     {
         (caster, foe) = UseMovement(caster, foe);
-        return ApplyMovement(caster, foe);        
-    }
-    public KeyValuePair<Player, EnemyTrainer> ReturnCaster(Trainer caster, Trainer foe)
-    {
-        if (caster is EnemyTrainer)
+        if (MovementHit(caster, foe))
         {
-            return new KeyValuePair<Player, EnemyTrainer>(foe as Player, caster as EnemyTrainer);
+            (caster, foe) = ApplyMovement(caster, foe);
+
         }
         else
         {
+            Console.WriteLine("El movimiento falló!");
+        }
+        if(caster is Player)
+        {
             return new KeyValuePair<Player, EnemyTrainer>(caster as Player, foe as EnemyTrainer);
         }
+        else
+        {
+            return new KeyValuePair<Player, EnemyTrainer>(foe as Player, caster as EnemyTrainer);
+        }        
     }
-    public KeyValuePair<Player, EnemyTrainer> UseMovement(Trainer caster, Trainer foe)
+    //public object ReturnCaster(Trainer caster, Trainer foe)
+    //{
+    //    if (caster is EnemyTrainer)
+    //    {
+    //        return new KeyValuePair<Player, EnemyTrainer>(foe as Player, caster as EnemyTrainer);
+    //    }
+    //    else
+    //    {
+    //        return new KeyValuePair<Player, EnemyTrainer>(caster as Player, foe as EnemyTrainer);
+    //    }
+    //}
+    public KeyValuePair<Trainer, Trainer> UseMovement(Trainer caster, Trainer foe)
     {
         if (caster.pokemonList[caster.battlePokemon].movementChosen is INonTrainableMove)
         {
@@ -170,13 +223,14 @@ public class Battle
             {
                 if (movements == caster.pokemonList[caster.battlePokemon].movementChosen)
                 {
-                    (caster.pokemonList[caster.battlePokemon], foe.pokemonList[caster.battlePokemon]) = movements.Use(caster.pokemonList[caster.battlePokemon], foe.pokemonList[caster.battlePokemon]);                    
+                    (caster.pokemonList[caster.battlePokemon], foe.pokemonList[caster.battlePokemon]) = movements.Use(caster.pokemonList[caster.battlePokemon], foe.pokemonList[caster.battlePokemon]);
+                    return new KeyValuePair<Trainer, Trainer>(caster, foe); 
                 }
             }
         }
-        return ReturnCaster(caster,foe);
+        return new KeyValuePair<Trainer, Trainer>(caster, foe);
     }
-    public KeyValuePair<Player, EnemyTrainer> ApplyMovement(Trainer caster, Trainer foe)
+    public KeyValuePair<Trainer, Trainer> ApplyMovement(Trainer caster, Trainer foe)
     {
         switch (caster.pokemonList[caster.battlePokemon].movementChosen.movementType)
         {
@@ -186,46 +240,86 @@ public class Battle
             case (Movements.MovementType.Heal):
                 caster.pokemonList[caster.battlePokemon].HP += Heal(caster.pokemonList[caster.battlePokemon]);
                 break;
-            case (Movements.MovementType.Mix):
+            case (Movements.MovementType.DamageHeal):
+                break;
+            case (Movements.MovementType.DamageBoth):
+                int damage = Damage(caster.pokemonList[caster.battlePokemon], foe.pokemonList[foe.battlePokemon]);
+                foe.pokemonList[foe.battlePokemon].HP -= damage;
+                caster.pokemonList[caster.battlePokemon].HP -= ((IDamageBoth)caster.pokemonList[caster.battlePokemon].movementChosen).AutoDamage(damage);
+                break;
+            case (Movements.MovementType.IgnoreArmor):
+                foe.pokemonList[foe.battlePokemon].HP -= foe.pokemonList[foe.battlePokemon].movementChosen.attack;
+                break;
+            case (Movements.MovementType.AffectsTrainer):
+                (caster, foe) = caster.pokemonList[caster.battlePokemon].movementChosen.Use(caster, foe);
+                break;
+            case (Movements.MovementType.MultipleAttack):
+                int attackTimes = (caster.pokemonList[caster.battlePokemon].movementChosen as IMultipleAttack).AttackTimes();
+                Console.WriteLine("El pokemon usó el ataque" + attackTimes + " veces!");
+                for (int i = 0; i < attackTimes; i++)
+                {
+                    foe.pokemonList[foe.battlePokemon].HP -= Damage(caster.pokemonList[caster.battlePokemon], foe.pokemonList[foe.battlePokemon]);
+                }
+                break;
+            case (Movements.MovementType.OneHitKO):
+                foe.pokemonList[foe.battlePokemon].HP = 0;
+                break;
+            case (Movements.MovementType.Counter):
+                foe.pokemonList[foe.battlePokemon].HP -= Damage(foe.pokemonList[foe.battlePokemon], caster.pokemonList[caster.battlePokemon]) * 2;
+                break;
+            case (Movements.MovementType.AutoDamage):
+                caster.pokemonList[foe.battlePokemon].HP -= Damage(caster.pokemonList[caster.battlePokemon], caster.pokemonList[caster.battlePokemon]);
                 break;
             default:
                 break;
         }
-        SetStatusDuration(caster.pokemonList[caster.battlePokemon].movementChosen);
-        return ReturnCaster(caster, foe);
+        SetStatusDuration(caster.pokemonList[caster.battlePokemon], foe.pokemonList[foe.battlePokemon]);
+        return new KeyValuePair<Trainer, Trainer>(caster, foe);
     }
-    public void SetStatusDuration(Movements movementChosen)
+    public bool MovementHit(Trainer caster, Trainer foe)
     {
-        if (movementChosen is ITurnLimitedEffect)
+        return caster.pokemonList[caster.battlePokemon].movementChosen.MovementAccuracy(caster, foe);
+    }
+    public void SetStatusDuration(Pokemon pokemon, Pokemon foePokemon)
+    {
+        if (pokemon.movementChosen is ITurnLimitedEffect)
         {
-            if (movementChosen is ICauseNVStatus)
+            if (pokemon.movementChosen is ICauseNVStatus)
             {
-                switch (((ICauseNVStatus)movementChosen).StatusCaused())
+                switch (((ICauseNVStatus)pokemon.movementChosen).StatusCaused())
                 {
                     case NonVolatileStatus.Paralysis:
-                        turnsToBeParalyzed = (((ITurnLimitedEffect)movementChosen).SetStatusTurns());
+                        foePokemon.turnsToBeParalyzed = (((ITurnLimitedEffect)pokemon.movementChosen).SetStatusTurns());
                         break;
                     case NonVolatileStatus.Sleep:
-                        turnsToSleep = (((ITurnLimitedEffect)movementChosen).SetStatusTurns());
+                        foePokemon.turnsToSleep = (((ITurnLimitedEffect)pokemon.movementChosen).SetStatusTurns());
                         break;
                     default:
                         break;
                 }
             }
-            else if (movementChosen is ICauseVStatus)
+            else if (pokemon.movementChosen is ICauseVStatus)
             {
-                VolatileStatus statusCaused = (((ICauseVStatus)movementChosen).StatusCaused());                
-                if ((statusCaused | VolatileStatus.Confusion) == VolatileStatus.Confusion)
+                VolatileStatus statusCaused = (((ICauseVStatus)pokemon.movementChosen).StatusCaused());
+                if (statusCaused.HasFlag(VolatileStatus.Confusion))
                 {
-                    turnsToBeConfused = (((ITurnLimitedEffect)movementChosen).SetStatusTurns());
+                    foePokemon.turnsToBeConfused = (((ITurnLimitedEffect)pokemon.movementChosen).SetStatusTurns());
                 }
-                if ((statusCaused | VolatileStatus.Charge) == VolatileStatus.Charge)
+                if (statusCaused.HasFlag(VolatileStatus.Charge))
                 {
-                    chargeTurns = (((ITurnLimitedEffect)movementChosen).SetStatusTurns());
+                    foePokemon.turnsToCharge = (((ITurnLimitedEffect)pokemon.movementChosen).SetStatusTurns());
+                }
+                if (statusCaused.HasFlag(VolatileStatus.Leer))
+                {
+                    foePokemon.turnsToBeLeered = (((ITurnLimitedEffect)pokemon.movementChosen).SetStatusTurns());
+                }
+                if (statusCaused.HasFlag(VolatileStatus.TailWhip))
+                {
+                    foePokemon.turnsToBeTailWhipped = (((ITurnLimitedEffect)pokemon.movementChosen).SetStatusTurns());
                 }
             }
         }
-    }    
+    }
     STATUS SetEnemyStatus(EnemyTrainer enemyTrainer)
     {
         if (enemyTrainer.pokemonList[enemyTrainer.battlePokemon].ShouldHeal())
@@ -261,7 +355,7 @@ public class Battle
                 totalWeakPokemons++;
             }
         }
-        if (totalWeakPokemons < 4)
+        if (totalWeakPokemons < 4 && enemyTrainer.pokemonList[enemyTrainer.battlePokemon].MustRetreat())
         {
             return true;
         }
@@ -341,7 +435,7 @@ public class Battle
             }
         }
         return bonus;
-    }   
+    }
     public float Bonus(Pokemon attackPokemon, ElementalTypes movementElementalType)
     {
         float bonus = 1f;
@@ -353,7 +447,7 @@ public class Battle
             }
         }
         return bonus;
-    }   
+    }
     public float SetEfectiveness(ElementalTypes movementType, Dictionary<string, ElementalTypes> defensePokemonType)
     {
         float zeroEffectiveness = 0;
@@ -580,7 +674,7 @@ public class Battle
         foreach (Movements movements in attackPokemon.movementList)
         {
             if (movements.PP > 0 && movements.movementType == Movements.MovementType.Damage)
-            {                
+            {
                 struggle = false;
             }
         }
@@ -592,6 +686,10 @@ public class Battle
         {
             foreach (Movements movements in attackPokemon.movementList)
             {
+                if(movements.movementType == Movements.MovementType.OneHitKO)
+                {
+                    return movements;
+                }
                 if (movements.movementType == Movements.MovementType.Damage)
                 {
                     enemyDamageMove.Add(movements);
@@ -605,13 +703,13 @@ public class Battle
             if (i == 0)
             {
                 attackPokemon.movementChosen = enemyDamageMove[i];
-                maxDamageInList = SimpleDamage(attackPokemon, attackPokemon.movementList[i], defensePokemon.pokeType);                
+                maxDamageInList = SimpleDamage(attackPokemon, attackPokemon.movementList[i], defensePokemon.pokeType);
             }
             else
             {
                 auxDamage = SimpleDamage(attackPokemon, attackPokemon.movementList[i], defensePokemon.pokeType);
                 if (auxDamage > maxDamageInList)
-                { 
+                {
                     attackPokemon.movementChosen = enemyDamageMove[i];
                     maxDamageInList = auxDamage;
                 }
@@ -669,7 +767,7 @@ public class Battle
         }
         return pokeDefense;
     }
-    public bool BattleChecker(Player player)
+    public KeyValuePair<bool, Player> BattleChecker(Player player)
     {
         bool battleLoop = true;
         if (player.pokemonList[player.battlePokemon].HP < 1)
@@ -686,14 +784,17 @@ public class Battle
                 Console.WriteLine("Ha muerto tu pokemon! Elige qué Pokemon quieres que siga");
                 for (int i = 0; i < player.pokemonList.Count; i++)
                 {
-                    if (player.pokemonList[i].HP < 1)
+                    if (player.pokemonList[i].HP > 0)
                     {
-                        Console.WriteLine(player.pokemonList[i]);
+                        Console.WriteLine(i + " -  " + player.pokemonList[i].name);
                     }
                 }
+                int option = Convert.ToInt32(Console.ReadLine());
+                player.battlePokemon = option;
+                Console.WriteLine("Elegiste al pokemon " + player.pokemonList[player.battlePokemon].name);
             }
         }
-        return battleLoop;
+        return new KeyValuePair<bool, Player>(battleLoop, player);
     }
     public bool BattleChecker(EnemyTrainer enemyTrainer)
     {
@@ -705,12 +806,12 @@ public class Battle
             if (enemyTrainer.remainingPokemons == 0)
             {
                 Console.WriteLine("Enemigo " + enemyTrainer.name + " fue derrotado!");
-                battleLoop = false;
+                battleLoop = false; 
             }
             else
             {
-                enemyTrainer.battlePokemon = InitialBattlePokemon(enemyTrainer.pokemonList);
-                Console.WriteLine("El enemigo ha elegido a " + enemyTrainer.pokemonList[enemyTrainer.battlePokemon]);
+                enemyTrainer.battlePokemon = RetreatEnemyPokemon(enemyTrainer.pokemonList);
+                Console.WriteLine("El enemigo ha elegido a " + enemyTrainer.pokemonList[enemyTrainer.battlePokemon].name);
             }
         }
         return battleLoop;
@@ -733,12 +834,12 @@ public class Battle
                 break;
             case NonVolatileStatus.Paralysis:
                 pokemon = Paralysis(pokemon);
-                turnsParalyzed++;
-                if (turnsParalyzed == 3)
+                pokemon.turnsParalyzed++;
+                if (pokemon.turnsParalyzed == 3)
                 {
                     Console.WriteLine("El pokemon " + pokemon.name + " fue liberado de la parálisis");
                     pokemon.SetNonVolatileStatus(NonVolatileStatus.None);
-                    turnsParalyzed = 0;
+                    pokemon.turnsParalyzed = 0;
                 }
                 break;
             case NonVolatileStatus.Poison:
@@ -767,13 +868,13 @@ public class Battle
     }
     public Pokemon Paralysis(Pokemon pokemon)
     {
-        if (turnsParalyzed == turnsToBeParalyzed)
+        if (pokemon.turnsParalyzed == pokemon.turnsToBeParalyzed)
         {
             Console.WriteLine("El pokemon " + pokemon.name + " fue liberado de la parálisis");
             pokemon.SetNonVolatileStatus(NonVolatileStatus.None);
             pokemon.canAttack = true;
-            turnsParalyzed = 0;
-            turnsToBeParalyzed = 0;
+            pokemon.turnsParalyzed = 0;
+            pokemon.turnsToBeParalyzed = 0;
         }
         else
         {
@@ -788,7 +889,7 @@ public class Battle
             {
                 pokemon.canAttack = true;
             }
-            turnsParalyzed++;
+            pokemon.turnsParalyzed++;
         }
         return pokemon;
     }
@@ -805,57 +906,70 @@ public class Battle
         //    Random random = new Random();
         //    turnsToSleep = random.Next(1, 7);
         //}        
-        if (turnsAsleep == turnsToSleep)
+        if (pokemon.turnsAsleep == pokemon.turnsToSleep)
         {
             Console.WriteLine("El pokemon " + pokemon.name + " se despertó!");
             pokemon.SetNonVolatileStatus(NonVolatileStatus.None);
             pokemon.canAttack = true;
-            turnsAsleep = 0;
-            turnsToSleep = 0;
+            pokemon.turnsAsleep = 0;
+            pokemon.turnsToSleep = 0;
         }
         else
         {
             Console.WriteLine("El pokemon está dormido y no puede atacar!");
-            turnsAsleep++;
+            pokemon.turnsAsleep++;
             pokemon.canAttack = false;
         }
         return pokemon;
     }
-    public KeyValuePair<Pokemon,Pokemon> CheckVolatileStatus(Pokemon pokemon, Pokemon foePokemon)
+    public KeyValuePair<Pokemon, Pokemon> CheckVolatileStatus(Pokemon pokemon, Pokemon foePokemon)
     {
-        // acá intenté usar los bitwise operators, me falta ver cómo hacer para que confusion no anule el canAttack que imponen los
+        // acá intenté usar los bitwise operators, me falta ver cómo hacer para que no anulen el canAttack que imponen los
         // status no volátiles
-        if ((pokemon.GetVolatileStatus() | VolatileStatus.Confusion) == VolatileStatus.Confusion)
+        VolatileStatus volatileStatus = pokemon.GetVolatileStatus();
+        if (volatileStatus.HasFlag(VolatileStatus.Confusion))
         {
             (pokemon, foePokemon) = Confusion(pokemon, foePokemon);
         }
-        if ((pokemon.GetVolatileStatus() | VolatileStatus.Curse) == VolatileStatus.Curse)
+        if (volatileStatus.HasFlag(VolatileStatus.Curse))
         {
             pokemon.HP -= Curse(pokemon.GetMaxHP());
         }
-        if ((pokemon.GetVolatileStatus() | VolatileStatus.Charge) == VolatileStatus.Charge)
+        if (volatileStatus.HasFlag(VolatileStatus.Charge))
         {
-            pokemon = Charge(pokemon);
+            //pokemon = Charge(pokemon);
         }
-        return new KeyValuePair<Pokemon, Pokemon> (pokemon, foePokemon);
+        if (volatileStatus.HasFlag(VolatileStatus.Leer))
+        {
+            foePokemon = Leer(foePokemon);
+        }
+        if (volatileStatus.HasFlag(VolatileStatus.TailWhip))
+        {
+            foePokemon = TailWhip(foePokemon);
+        }
+        if (volatileStatus.HasFlag(VolatileStatus.Rage))
+        {
+            pokemon = Rage(pokemon, foePokemon);
+        }
+        return new KeyValuePair<Pokemon, Pokemon>(pokemon, foePokemon);
     }
-    public KeyValuePair<Pokemon,Pokemon> Confusion (Pokemon pokemon, Pokemon foePokemon)
+    public KeyValuePair<Pokemon, Pokemon> Confusion(Pokemon pokemon, Pokemon foePokemon)
     {
         // esto tmb va a ir en el SetStatusDuration()
         //turnsToBeConfused = TurnSetter(turnsConfused, turnsToBeConfused, pokemon.movementChosen);        
-        if (turnsConfused == turnsToBeConfused)
+        if (pokemon.turnsConfused == pokemon.turnsToBeConfused)
         {
             Console.WriteLine("El pokemon " + pokemon.name + " se despabiló!");
             pokemon.SetNonVolatileStatus(NonVolatileStatus.None);
             pokemon.canAttack = true;
-            turnsConfused = 0;
-            turnsToBeConfused = 0;
+            pokemon.turnsConfused = 0;
+            pokemon.turnsToBeConfused = 0;
         }
         else
         {
             Random confuseResult = new Random();
             int chances = confuseResult.Next(0, 99);
-            if(chances < 50)
+            if (chances < 50)
             {
                 pokemon.canAttack = true;
                 pokemon.autoAttack = true;
@@ -864,19 +978,19 @@ public class Battle
                 //pokemon.HP -= Damage(pokemon, pokemon);
                 //pokemon.canAttack = false;
             }
-            if(chances > 50 && chances < 75)
+            if (chances > 50 && chances < 75)
             {
-                Random randomMove = new Random();                
+                Random randomMove = new Random();
                 Console.WriteLine("El pokemon está confundido!");
                 pokemon.autoAttack = true;
-                pokemon.movementChosen = pokemon.movementList[randomMove.Next(0,3)];
-                turnsConfused++;
+                pokemon.movementChosen = pokemon.movementList[randomMove.Next(0, 3)];
+                pokemon.turnsConfused++;
                 pokemon.canAttack = true;
             }
             else
             {
                 pokemon.canAttack = true;
-            }            
+            }
         }
         return new KeyValuePair<Pokemon, Pokemon>(pokemon, foePokemon);
     }
@@ -886,40 +1000,73 @@ public class Battle
     }
     public Pokemon Charge(Pokemon pokemon)
     {
-        turnsToCharge = TurnSetter(chargeTurns, turnsToCharge, pokemon.movementChosen);
-        if (turnsToCharge == chargeTurns)
+        if (pokemon.turnsToCharge == pokemon.chargeTurns)
         {
-            Console.WriteLine("El pokemon " + pokemon.name + " se despabiló!");
             pokemon.SetNonVolatileStatus(NonVolatileStatus.None);
             pokemon.canAttack = true;
-            turnsConfused = 0;
-            turnsToBeConfused = 0;
+            pokemon.autoAttack = true;
+            pokemon.chargeTurns = 0;
+            pokemon.turnsToCharge = 0;
         }
         else
         {
-            Random confuseResult = new Random();
-            int chances = confuseResult.Next(0, 99);
-            if (chances < 50)
-            {
-                pokemon.movementChosen = new Confused();
-                pokemon.movementChosen.Use(pokemon);
-                pokemon.HP -= Damage(pokemon, pokemon);
-                pokemon.canAttack = false;
-            }
-            if (chances > 50 && chances < 75)
-            {
-                Console.WriteLine("El pokemon está confundido!");
-                pokemon.movementChosen = pokemon.movementList[1];
-                turnsConfused++;
-                pokemon.canAttack = false;
-            }
-            else
-            {
-                pokemon.canAttack = true;
-            }
+            Console.WriteLine("El pokemon está cargando el movimiento");
+            pokemon.canAttack = false;
         }
         return pokemon;
     }
+    public Pokemon Leer(Pokemon foePokemon)
+    {
+        if (foePokemon.leerTurns == foePokemon.turnsToBeLeered)
+        {
+            foePokemon.RemoveVolatileStatus(VolatileStatus.Leer);
+            foePokemon.battleAttack = foePokemon.GetDefense();
+            foePokemon.leerTurns = 0;
+            foePokemon.turnsToBeLeered = 0;
+        }
+        if (foePokemon.leerTurns == 0)
+        {
+            foePokemon.battleAttack = Convert.ToInt32(foePokemon.battleAttack * 0.70);
+            foePokemon.leerTurns++;
+        }
+        else
+        {
+            foePokemon.leerTurns++;
+        }
+        return foePokemon;
+    }
+    public Pokemon TailWhip(Pokemon foePokemon)
+    {
+        if (foePokemon.tailWhipTurns == foePokemon.turnsToBeTailWhipped)
+        {
+            foePokemon.RemoveVolatileStatus(VolatileStatus.TailWhip);
+            foePokemon.battleAttack = foePokemon.GetDefense();
+            foePokemon.tailWhipTurns = 0;
+            foePokemon.turnsToBeTailWhipped = 0;
+        }
+        if (foePokemon.tailWhipTurns == 0)
+        {
+            foePokemon.battleDefense = Convert.ToInt32(foePokemon.battleDefense * 0.70);
+            foePokemon.tailWhipTurns++;
+        }
+        else
+        {
+            foePokemon.tailWhipTurns++; 
+        }
+        return foePokemon;
+    }
+    public Pokemon Rage(Pokemon pokemon, Pokemon foePokemon)
+    {        
+        if (foePokemon.movementChosen.movementType == Movements.MovementType.Damage && pokemon.rageBoost < 7)
+        {
+            Console.WriteLine("Como el pokemon enemigo usó un ataque de daño, el ataque del pokemon enfurecido subió!");
+            pokemon.rageBoost++;
+            pokemon.battleAttack += 2;
+        }        
+        pokemon.autoAttack = true;
+        return pokemon;
+    }
+
     public int TurnSetter(int turnsInStatus, int totalTurnsToBe, Movements movementChosen)
     {
         if (turnsInStatus == 0 && movementChosen is ITurnLimitedEffect)
@@ -931,12 +1078,12 @@ public class Battle
             return totalTurnsToBe;
         }
     }
-//  machete de docs de c# de microsoft
-//   var flags = MyFlags.Pepsi | MyFlags.Coke;
-//    var colas = MyFlags.Pepsi | MyFlags.Coke;
-//    Console.WriteLine("Hay colas en flags {0}", (flags & colas) == colas ? "Yes" : "No"); //output Yes
-//    flags &= ~MyFlags.Coke;
-//    Console.WriteLine("Hay una cola en flags post cambio {0}", (flags | colas) == colas ? "Yes" : "No");//output yES
-//}
+    //  machete de docs de c# de microsoft
+    //   var flags = MyFlags.Pepsi | MyFlags.Coke;
+    //    var colas = MyFlags.Pepsi | MyFlags.Coke;
+    //    Console.WriteLine("Hay colas en flags {0}", (flags & colas) == colas ? "Yes" : "No"); //output Yes
+    //    flags &= ~MyFlags.Coke;
+    //    Console.WriteLine("Hay una cola en flags post cambio {0}", (flags | colas) == colas ? "Yes" : "No");//output yES
+    //}
 
 }

@@ -30,5 +30,17 @@ public abstract class Trainer
             pokemonList.Add(new Pokemon(name + "/" + playerPokemons[i]));
         }
     }
+    public List<int> AlivePokemonsByIndex()
+    {
+        List<int> alivePokemonByIndex = new List<int>();
+        for(int i = 0; i < pokemonList.Count; i++)
+        {
+            if(pokemonList[i].HP > 0)
+            {
+                alivePokemonByIndex.Add(i);
+            }
+        }
+        return alivePokemonByIndex;
+    }
 }
 

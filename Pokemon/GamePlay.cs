@@ -50,19 +50,8 @@ public class GamePlay
     {
         Console.WriteLine("Ingresá tu nombre");
         playerName = Console.ReadLine();
-        Console.WriteLine("Bienvenido, " + playerName);
-        //int option = Convert.ToInt32(Console.ReadLine());
-        //switch (option)
-        //{
-        //    case 1:
-        //        Console.WriteLine("Elegiste un combo de pokemones balanceados, suerte!");
-        //        optionFilePath = "Player/player.txt";
-        //        break;
-        //    default:
-        //        Console.WriteLine("Ingresaste una opción no válida. Para no hacer muchos while loops, te asignaré un equipo de pokemones balanceados");
-        //        optionFilePath = "Player/player.txt";
-        //        break;
-        //}
+        Console.WriteLine("Bienvenido, " + playerName + "presiona enter para continuar");
+        Console.Clear();
         player = new Player(playerName, "Player/player.txt");
         Console.WriteLine(playerName + ", tus pokemones serán los siguientes:");
         for(int i = 0; i < player.pokemonList.Count; i++)
@@ -71,6 +60,7 @@ public class GamePlay
         }
         Console.WriteLine("Presione cualquier tecla para continuar");
         Console.ReadLine();
+        Console.Clear();
         liga = new Liga(player);
     }
 }
